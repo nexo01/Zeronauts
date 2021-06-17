@@ -1,18 +1,11 @@
-/**
- *Submitted for verification at BscScan.com on 2021-05-18
-*/
-
 pragma solidity ^0.6.12;
 // SPDX-License-Identifier: Unlicensed
 interface IERC20 {
-
     function totalSupply() external view returns (uint256);
-
     /**
      * @dev Returns the amount of tokens owned by `account`.
      */
     function balanceOf(address account) external view returns (uint256);
-
     /**
      * @dev Moves `amount` tokens from the caller's account to `recipient`.
      *
@@ -21,7 +14,6 @@ interface IERC20 {
      * Emits a {Transfer} event.
      */
     function transfer(address recipient, uint256 amount) external returns (bool);
-
     /**
      * @dev Returns the remaining number of tokens that `spender` will be
      * allowed to spend on behalf of `owner` through {transferFrom}. This is
@@ -30,7 +22,6 @@ interface IERC20 {
      * This value changes when {approve} or {transferFrom} are called.
      */
     function allowance(address owner, address spender) external view returns (uint256);
-
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
      *
@@ -46,7 +37,6 @@ interface IERC20 {
      * Emits an {Approval} event.
      */
     function approve(address spender, uint256 amount) external returns (bool);
-
     /**
      * @dev Moves `amount` tokens from `sender` to `recipient` using the
      * allowance mechanism. `amount` is then deducted from the caller's
@@ -57,7 +47,6 @@ interface IERC20 {
      * Emits a {Transfer} event.
      */
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
      * another (`to`).
@@ -65,16 +54,12 @@ interface IERC20 {
      * Note that `value` may be zero.
      */
     event Transfer(address indexed from, address indexed to, uint256 value);
-
     /**
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
      */
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
-
-
-
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
  * checks.
@@ -103,10 +88,8 @@ library SafeMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         require(c >= a, "SafeMath: addition overflow");
-
         return c;
     }
-
     /**
      * @dev Returns the subtraction of two unsigned integers, reverting on
      * overflow (when the result is negative).
@@ -120,7 +103,6 @@ library SafeMath {
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return sub(a, b, "SafeMath: subtraction overflow");
     }
-
     /**
      * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
      * overflow (when the result is negative).
@@ -134,10 +116,8 @@ library SafeMath {
     function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b <= a, errorMessage);
         uint256 c = a - b;
-
         return c;
     }
-
     /**
      * @dev Returns the multiplication of two unsigned integers, reverting on
      * overflow.
@@ -155,13 +135,10 @@ library SafeMath {
         if (a == 0) {
             return 0;
         }
-
         uint256 c = a * b;
         require(c / a == b, "SafeMath: multiplication overflow");
-
         return c;
     }
-
     /**
      * @dev Returns the integer division of two unsigned integers. Reverts on
      * division by zero. The result is rounded towards zero.
@@ -177,7 +154,6 @@ library SafeMath {
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         return div(a, b, "SafeMath: division by zero");
     }
-
     /**
      * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
      * division by zero. The result is rounded towards zero.
@@ -194,10 +170,8 @@ library SafeMath {
         require(b > 0, errorMessage);
         uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
         return c;
     }
-
     /**
      * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
      * Reverts when dividing by zero.
@@ -213,7 +187,6 @@ library SafeMath {
     function mod(uint256 a, uint256 b) internal pure returns (uint256) {
         return mod(a, b, "SafeMath: modulo by zero");
     }
-
     /**
      * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
      * Reverts with custom message when dividing by zero.
@@ -231,19 +204,15 @@ library SafeMath {
         return a % b;
     }
 }
-
 abstract contract Context {
     function _msgSender() internal view virtual returns (address payable) {
         return msg.sender;
     }
-
     function _msgData() internal view virtual returns (bytes memory) {
         this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         return msg.data;
     }
 }
-
-
 /**
  * @dev Collection of functions related to the address type
  */
@@ -275,7 +244,6 @@ library Address {
         assembly { codehash := extcodehash(account) }
         return (codehash != accountHash && codehash != 0x0);
     }
-
     /**
      * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
      * `recipient`, forwarding all available gas and reverting on errors.
@@ -294,12 +262,10 @@ library Address {
      */
     function sendValue(address payable recipient, uint256 amount) internal {
         require(address(this).balance >= amount, "Address: insufficient balance");
-
         // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
         (bool success, ) = recipient.call{ value: amount }("");
         require(success, "Address: unable to send value, recipient may have reverted");
     }
-
     /**
      * @dev Performs a Solidity function call using a low level `call`. A
      * plain`call` is an unsafe replacement for a function call: use this
@@ -321,7 +287,6 @@ library Address {
     function functionCall(address target, bytes memory data) internal returns (bytes memory) {
       return functionCall(target, data, "Address: low-level call failed");
     }
-
     /**
      * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with
      * `errorMessage` as a fallback revert reason when `target` reverts.
@@ -331,7 +296,6 @@ library Address {
     function functionCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
         return _functionCallWithValue(target, data, 0, errorMessage);
     }
-
     /**
      * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
      * but also transferring `value` wei to `target`.
@@ -346,7 +310,6 @@ library Address {
     function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
         return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
     }
-
     /**
      * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but
      * with `errorMessage` as a fallback revert reason when `target` reverts.
@@ -357,10 +320,8 @@ library Address {
         require(address(this).balance >= value, "Address: insufficient balance for call");
         return _functionCallWithValue(target, data, value, errorMessage);
     }
-
     function _functionCallWithValue(address target, bytes memory data, uint256 weiValue, string memory errorMessage) private returns (bytes memory) {
         require(isContract(target), "Address: call to non-contract");
-
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = target.call{ value: weiValue }(data);
         if (success) {
@@ -369,7 +330,6 @@ library Address {
             // Look for revert reason and bubble it up if present
             if (returndata.length > 0) {
                 // The easiest way to bubble the revert reason is using memory via assembly
-
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
                     let returndata_size := mload(returndata)
@@ -381,7 +341,6 @@ library Address {
         }
     }
 }
-
 /**
  * @dev Contract module which provides a basic access control mechanism, where
  * there is an account (an owner) that can be granted exclusive access to
@@ -398,9 +357,7 @@ contract Ownable is Context {
     address private _owner;
     address private _previousOwner;
     uint256 private _lockTime;
-
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
@@ -409,14 +366,12 @@ contract Ownable is Context {
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
     }
-
     /**
      * @dev Returns the address of the current owner.
      */
     function owner() public view returns (address) {
         return _owner;
     }
-
     /**
      * @dev Throws if called by any account other than the owner.
      */
@@ -424,7 +379,17 @@ contract Ownable is Context {
         require(_owner == _msgSender(), "Ownable: caller is not the owner");
         _;
     }
-
+     /**
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions anymore. Can only be called by the current owner.
+     *
+     * NOTE: Renouncing ownership will leave the contract without an owner,
+     * thereby removing any functionality that is only available to the owner.
+     */
+    function renounceOwnership() public virtual onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
     /**
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      * Can only be called by the current owner.
@@ -434,11 +399,9 @@ contract Ownable is Context {
         emit OwnershipTransferred(_owner, newOwner);
         _owner = newOwner;
     }
-
     function geUnlockTime() public view returns (uint256) {
         return _lockTime;
     }
-
     //Locks the contract for owner for the amount of time provided
     function lock(uint256 time) public virtual onlyOwner {
         _previousOwner = _owner;
@@ -455,49 +418,35 @@ contract Ownable is Context {
         _owner = _previousOwner;
     }
 }
-
 // pragma solidity >=0.5.0;
-
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
-
     function feeTo() external view returns (address);
     function feeToSetter() external view returns (address);
-
     function getPair(address tokenA, address tokenB) external view returns (address pair);
     function allPairs(uint) external view returns (address pair);
     function allPairsLength() external view returns (uint);
-
     function createPair(address tokenA, address tokenB) external returns (address pair);
-
     function setFeeTo(address) external;
     function setFeeToSetter(address) external;
 }
-
-
 // pragma solidity >=0.5.0;
-
 interface IUniswapV2Pair {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
-
     function name() external pure returns (string memory);
     function symbol() external pure returns (string memory);
     function decimals() external pure returns (uint8);
     function totalSupply() external view returns (uint);
     function balanceOf(address owner) external view returns (uint);
     function allowance(address owner, address spender) external view returns (uint);
-
     function approve(address spender, uint value) external returns (bool);
     function transfer(address to, uint value) external returns (bool);
     function transferFrom(address from, address to, uint value) external returns (bool);
-
     function DOMAIN_SEPARATOR() external view returns (bytes32);
     function PERMIT_TYPEHASH() external pure returns (bytes32);
     function nonces(address owner) external view returns (uint);
-
     function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
-
     event Mint(address indexed sender, uint amount0, uint amount1);
     event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
     event Swap(
@@ -509,7 +458,6 @@ interface IUniswapV2Pair {
         address indexed to
     );
     event Sync(uint112 reserve0, uint112 reserve1);
-
     function MINIMUM_LIQUIDITY() external pure returns (uint);
     function factory() external view returns (address);
     function token0() external view returns (address);
@@ -518,22 +466,17 @@ interface IUniswapV2Pair {
     function price0CumulativeLast() external view returns (uint);
     function price1CumulativeLast() external view returns (uint);
     function kLast() external view returns (uint);
-
     function mint(address to) external returns (uint liquidity);
     function burn(address to) external returns (uint amount0, uint amount1);
     function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
     function skim(address to) external;
     function sync() external;
-
     function initialize(address, address) external;
 }
-
 // pragma solidity >=0.6.2;
-
 interface IUniswapV2Router01 {
     function factory() external pure returns (address);
     function WETH() external pure returns (address);
-
     function addLiquidity(
         address tokenA,
         address tokenB,
@@ -616,18 +559,13 @@ interface IUniswapV2Router01 {
         external
         payable
         returns (uint[] memory amounts);
-
     function quote(uint amountA, uint reserveA, uint reserveB) external pure returns (uint amountB);
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) external pure returns (uint amountOut);
     function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) external pure returns (uint amountIn);
     function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
     function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
 }
-
-
-
 // pragma solidity >=0.6.2;
-
 interface IUniswapV2Router02 is IUniswapV2Router01 {
     function removeLiquidityETHSupportingFeeOnTransferTokens(
         address token,
@@ -646,7 +584,6 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
     ) external returns (uint amountETH);
-
     function swapExactTokensForTokensSupportingFeeOnTransferTokens(
         uint amountIn,
         uint amountOutMin,
@@ -668,18 +605,13 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
         uint deadline
     ) external;
 }
-
-
 contract Zeronauts is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
-
     mapping (address => uint256) private _rOwned;
     mapping (address => uint256) private _tOwned;
     mapping (address => mapping (address => uint256)) private _allowances;
-
     mapping (address => bool) private _isExcludedFromFee;
-
     mapping (address => bool) private _isExcluded;
     address[] private _excluded;
    
@@ -687,7 +619,6 @@ contract Zeronauts is Context, IERC20, Ownable {
     uint256 private constant _tTotal = 100000000 * 10**9;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
-
     string private constant _name = "Zeronauts";
     string private constant _symbol = "ZNS";
     uint8 private constant _decimals = 9;
@@ -713,7 +644,6 @@ contract Zeronauts is Context, IERC20, Ownable {
     address public _assesment;
     address public _reserve;
     address public _burn;
-
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
     
@@ -721,7 +651,7 @@ contract Zeronauts is Context, IERC20, Ownable {
     bool public swapAndLiquifyEnabled = true;
     
     uint256 public _maxTxAmount = 5000000 * 10**9;
-    uint256 private constant numTokensSellToAddToLiquidity = 500000 * 10**9;
+    uint256 public _numTokensSellToAddToLiquidity = 5000000 * 10**9; /*equals 5%*/
     
     event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
     event SwapAndLiquifyEnabledUpdated(bool enabled);
@@ -742,11 +672,10 @@ contract Zeronauts is Context, IERC20, Ownable {
     event SetReserveAddress(address caller, address rewadeAddress);
     event SetBusinessDevelopmentAddress(address caller,address rewadeAddress);
     event SetBurnAddress(address caller, address rewadeAddress);
-
-    event SetBNBRewardValues(address caller,uint256 _CharityValue,uint256 _StabilityReservevalue,uint256 _BusinessDevelopmentValue,uint256 _MarketingValue);
-    event SetTokenRewardValues(address caller,uint256 _AssessmentValue,uint256 _ReserveValue,uint256 _BurnValue);
+    event SetBNBRewardValues(address caller, uint256 _CharityValue,uint256 _StabilityReservevalue,uint256 _BusinessDevelopmentValue,uint256 _MarketingValue);
+    event SetTokenRewardValues(address caller, uint256 _AssessmentValue,uint256 _ReserveValue,uint256 _BurnValue);
     event TokenExtraction(uint256 bnbAmount,uint256 tokenamount);
-
+    event SetNumTokensSellToAddToLiquidity(address caller, uint256 numTokensSellToAddToLiquidity);
     
     modifier lockTheSwap {
         inSwapAndLiquify = true;
@@ -762,14 +691,12 @@ contract Zeronauts is Context, IERC20, Ownable {
         _assesment = assesment;
         _reserve = reserve;
         _burn = burn;
-
         _rOwned[_msgSender()] = _rTotal;
         
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
          // Create a uniswap pair for this new token
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
-
         // set the rest of the contract variables
         uniswapV2Router = _uniswapV2Router;
         
@@ -779,66 +706,52 @@ contract Zeronauts is Context, IERC20, Ownable {
         
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
-
     function name() public pure returns (string memory) {
         return _name;
     }
-
     function symbol() public pure returns (string memory) {
         return _symbol;
     }
-
     function decimals() public pure returns (uint8) {
         return _decimals;
     }
-
     function totalSupply() public view override returns (uint256) {
         return _tTotal;
     }
-
     function balanceOf(address account) public view override returns (uint256) {
         if (_isExcluded[account]) return _tOwned[account];
         return tokenFromReflection(_rOwned[account]);
     }
-
     function transfer(address recipient, uint256 amount) public override returns (bool) {
         _transfer(_msgSender(), recipient, amount);
         return true;
     }
-
     function allowance(address owner, address spender) public view override returns (uint256) {
         return _allowances[owner][spender];
     }
-
     function approve(address spender, uint256 amount) public override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
-
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
     }
-
     function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
         _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
         return true;
     }
-
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
         _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
         return true;
     }
-
     function isExcludedFromReward(address account) public view returns (bool) {
         return _isExcluded[account];
     }
-
     function totalFees() public view returns (uint256) {
         return _tFeeTotal;
     }
-
     function deliver(uint256 tAmount) public {
         address sender = _msgSender();
         require(!_isExcluded[sender], "Excluded addresses cannot call this function");
@@ -847,7 +760,6 @@ contract Zeronauts is Context, IERC20, Ownable {
         _rTotal = _rTotal.sub(rAmount);
         _tFeeTotal = _tFeeTotal.add(tAmount);
     }
-
     function reflectionFromToken(uint256 tAmount, bool deductTransferFee) public view returns(uint256) {
         require(tAmount <= _tTotal, "Amount must be less than supply");
         if (!deductTransferFee) {
@@ -858,13 +770,11 @@ contract Zeronauts is Context, IERC20, Ownable {
             return rTransferAmount;
         }
     }
-
     function tokenFromReflection(uint256 rAmount) public view returns(uint256) {
         require(rAmount <= _rTotal, "Amount must be less than total reflections");
         uint256 currentRate =  _getRate();
         return rAmount.div(currentRate);
     }
-
     function excludeFromReward(address account) public onlyOwner() {
         // require(account != 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D, 'We can not exclude Uniswap router.');
         require(!_isExcluded[account], "Account is already excluded");
@@ -875,12 +785,13 @@ contract Zeronauts is Context, IERC20, Ownable {
         _excluded.push(account);
         emit SetExcludeFromReward(msg.sender ,account);
     }
-
     function includeInReward(address account) external onlyOwner() {
-        require(_isExcluded[account], "Account is not excluded");
+        require(_isExcluded[account], "Account is already excluded");
         for (uint256 i = 0; i < _excluded.length; i++) {
             if (_excluded[i] == account) {
                 _excluded[i] = _excluded[_excluded.length - 1];
+                uint256 currentRate = _getRate();
+                _rOwned[account] = _tOwned[account].mul(currentRate);
                 _tOwned[account] = 0;
                 _isExcluded[account] = false;
                 _excluded.pop();
@@ -921,54 +832,50 @@ contract Zeronauts is Context, IERC20, Ownable {
     }
    
     function setMaxTxPercent(uint256 maxTxPercent) external onlyOwner() {
-        _maxTxAmount = _tTotal.mul(maxTxPercent).div(
-            10**2
-        );
+        _maxTxAmount = _tTotal.mul(maxTxPercent).div(10**2);
         emit SetMaxTxPercent(msg.sender, maxTxPercent);
     }
-
+    
+    function setNumTokensSellToAddToLiquidity(uint256 numTokensSellToAddToLiquidity) external onlyOwner(){
+        _numTokensSellToAddToLiquidity = numTokensSellToAddToLiquidity;
+        emit SetNumTokensSellToAddToLiquidity(msg.sender, numTokensSellToAddToLiquidity);
+    }
+    
     function setSwapAndLiquifyEnabled(bool _enabled) public onlyOwner {
         swapAndLiquifyEnabled = _enabled;
         emit SwapAndLiquifyEnabledUpdated(_enabled);
     }
-    
     
     function setMarketingAddress(address payable marketingaddress)public onlyOwner{
         require(marketingaddress != address(0),"setMarketingAddress: Not zero address");
         _marketing = marketingaddress;
         emit SetMarketingAddress(msg.sender, marketingaddress);
     }
-
     function setCharityAddress(address payable CharityAddress)public onlyOwner{
         require(CharityAddress != address(0),"setCharityAddress: Not zero address");
         _charity = CharityAddress;
         emit SetCharityAddress(msg.sender, CharityAddress);
     }
-
     function setStabilityReserveAddress(address payable StabilityReserveAddress)public onlyOwner{
         require(StabilityReserveAddress != address(0),"setStabilityReserveAddress: Not zero address");
         _stability = StabilityReserveAddress;
         emit SetStabilityReserveAddress(msg.sender, StabilityReserveAddress);
     }
-
     function setBusinessDevelopmentAddress(address payable BusinessDevelopmentAddress)public onlyOwner{
         require(BusinessDevelopmentAddress != address(0),"setBusinessDevelopmentAddress: Not zero address");
         _business = BusinessDevelopmentAddress;
         emit SetBusinessDevelopmentAddress(msg.sender, BusinessDevelopmentAddress);
     }
-
     function setReserveAddress(address ReserveAddress)public onlyOwner{
         require(ReserveAddress != address(0),"setReserveAddress: Not zero address");
         _reserve = ReserveAddress;
         emit SetReserveAddress(msg.sender, ReserveAddress);
     }
-
     function setAssesmentAddress(address AssesmentAddress)public onlyOwner{
         require(AssesmentAddress != address(0),"setAssesmentAddress: Not zero address");
         _assesment = AssesmentAddress;
         emit SetAssesmentAddress(msg.sender, AssesmentAddress);
     }
-
     function setBurnAddress(address BurnAddress)public onlyOwner{
         require(BurnAddress != address(0),"setBurnAddress: Not zero address");
         _burn = BurnAddress;
@@ -982,7 +889,6 @@ contract Zeronauts is Context, IERC20, Ownable {
         _marketingPcent = marketingPcent;
         emit SetBNBRewardValues(msg.sender, charityPcent, stabilityPcent, businessPcent, marketingPcent);
     }
-
     function setTokenRewardPercentage(uint256 assessmentPcent, uint256 reservePcent, uint256 burnPcent )public onlyOwner{
         require((assessmentPcent +reservePcent +burnPcent)==100,"setTokenRewardValues: invalid fee percentage");
         _assessmentPcent = assessmentPcent;
@@ -993,25 +899,21 @@ contract Zeronauts is Context, IERC20, Ownable {
     
      //to receive ETH from uniswapV2Router when swapping
     receive() external payable {}
-
     function _reflectFee(uint256 rFee, uint256 tFee) private {
         _rTotal = _rTotal.sub(rFee);
         _tFeeTotal = _tFeeTotal.add(tFee);
     }
-
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
         (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity) = _getTValues(tAmount);
         (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, tFee, tLiquidity, _getRate());
         return (rAmount, rTransferAmount, rFee, tTransferAmount, tFee, tLiquidity);
     }
-
     function _getTValues(uint256 tAmount) private view returns (uint256, uint256, uint256) {
         uint256 tFee = calculateTaxFee(tAmount);
         uint256 tLiquidity = calculateLiquidityFee(tAmount);
         uint256 tTransferAmount = tAmount.sub(tFee).sub(tLiquidity);
         return (tTransferAmount, tFee, tLiquidity);
     }
-
     function _getRValues(uint256 tAmount, uint256 tFee, uint256 tLiquidity, uint256 currentRate) private pure returns (uint256, uint256, uint256) {
         uint256 rAmount = tAmount.mul(currentRate);
         uint256 rFee = tFee.mul(currentRate);
@@ -1019,12 +921,10 @@ contract Zeronauts is Context, IERC20, Ownable {
         uint256 rTransferAmount = rAmount.sub(rFee).sub(rLiquidity);
         return (rAmount, rTransferAmount, rFee);
     }
-
     function _getRate() private view returns(uint256) {
         (uint256 rSupply, uint256 tSupply) = _getCurrentSupply();
         return rSupply.div(tSupply);
     }
-
     function _getCurrentSupply() private view returns(uint256, uint256) {
         uint256 rSupply = _rTotal;
         uint256 tSupply = _tTotal;      
@@ -1050,7 +950,6 @@ contract Zeronauts is Context, IERC20, Ownable {
             10**2
         );
     }
-
     function calculateLiquidityFee(uint256 _amount) private view returns (uint256) {
         return _amount.mul(_liquidityFee).div(
             10**2
@@ -1075,15 +974,12 @@ contract Zeronauts is Context, IERC20, Ownable {
     function isExcludedFromFee(address account) public view returns(bool) {
         return _isExcludedFromFee[account];
     }
-
     function _approve(address owner, address spender, uint256 amount) private {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
-
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
-
     function _transfer(
         address from,
         address to,
@@ -1094,7 +990,6 @@ contract Zeronauts is Context, IERC20, Ownable {
         require(amount > 0, "Transfer amount must be greater than zero");
         if(from != owner() && to != owner())
             require(amount <= _maxTxAmount, "Transfer amount exceeds the maxTxAmount.");
-
         // is the token balance of this contract address over the min number of
         // tokens that we need to initiate a swap + liquidity lock?
         // also, don't get caught in a circular liquidity event.
@@ -1106,14 +1001,14 @@ contract Zeronauts is Context, IERC20, Ownable {
             contractTokenBalance = _maxTxAmount;
         }
         
-        bool overMinTokenBalance = contractTokenBalance >= numTokensSellToAddToLiquidity;
+        bool overMinTokenBalance = contractTokenBalance >= _numTokensSellToAddToLiquidity;
         if (
             overMinTokenBalance &&
             !inSwapAndLiquify &&
             from != uniswapV2Pair &&
             swapAndLiquifyEnabled
         ) {
-            contractTokenBalance = numTokensSellToAddToLiquidity;
+            contractTokenBalance = _numTokensSellToAddToLiquidity;
             //add liquidity
             tokenExtraction(contractTokenBalance.mul(60).div(100));
             swapAndLiquify(contractTokenBalance.mul(40).div(100));
@@ -1132,7 +1027,6 @@ contract Zeronauts is Context, IERC20, Ownable {
     }
     
     function tokenExtraction(uint256 contractTokenBalance) private lockTheSwap{
-
         // split the contract balance into halves
         uint256 half = contractTokenBalance.div(2);
         uint256 otherHalf = contractTokenBalance.sub(half);
@@ -1141,7 +1035,6 @@ contract Zeronauts is Context, IERC20, Ownable {
         // swap creates, and not make the liquidity event include any ETH that
         // has been manually sent to the contract
         uint256 initialBalance = address(this).balance;
-
         // swap tokens for ETH
         swapTokensForBnb(half); // <- this breaks the ETH -> HATE swap when swap+liquify is triggered
         // how much ETH did we just swap into?
@@ -1155,41 +1048,32 @@ contract Zeronauts is Context, IERC20, Ownable {
         _tokenTransfer(address(this), _assesment,otherHalf.mul(_assessmentPcent).div(100), false);
         _tokenTransfer(address(this), _reserve,otherHalf.mul(_reservePcent).div(100), false);
         _tokenTransfer(address(this), _burn,otherHalf.mul(_burnPcent).div(100), false);
-
         emit TokenExtraction(newBalance,otherHalf);
     }
-
     function swapAndLiquify(uint256 contractTokenBalance) private lockTheSwap {
         // split the contract balance into halves
         uint256 half = contractTokenBalance.div(2);
         uint256 otherHalf = contractTokenBalance.sub(half);
-
         // capture the contract's current ETH balance.
         // this is so that we can capture exactly the amount of ETH that the
         // swap creates, and not make the liquidity event include any ETH that
         // has been manually sent to the contract
         uint256 initialBalance = address(this).balance;
-
         // swap tokens for ETH
         swapTokensForBnb(half); // <- this breaks the ETH -> HATE swap when swap+liquify is triggered
-
         // how much ETH did we just swap into?
         uint256 newBalance = address(this).balance.sub(initialBalance);
-
         // add liquidity to uniswap
         addLiquidity(otherHalf, newBalance);
         
         emit SwapAndLiquify(half, newBalance, otherHalf);
     }
-
     function swapTokensForBnb(uint256 tokenAmount) private {
         // generate the uniswap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = uniswapV2Router.WETH();
-
         _approve(address(this), address(uniswapV2Router), tokenAmount);
-
         // make the swap
         uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
             tokenAmount,
@@ -1199,11 +1083,9 @@ contract Zeronauts is Context, IERC20, Ownable {
             block.timestamp
         );
     }
-
     function addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
         // approve token transfer to cover all possible scenarios
         _approve(address(this), address(uniswapV2Router), tokenAmount);
-
         // add the liquidity
         uniswapV2Router.addLiquidityETH{value: ethAmount}(
             address(this),
@@ -1214,7 +1096,6 @@ contract Zeronauts is Context, IERC20, Ownable {
             block.timestamp
         );
     }
-
     //this method is responsible for taking all fee, if takeFee is true
     function _tokenTransfer(address sender, address recipient, uint256 amount,bool takeFee) private {
         if(!takeFee)
@@ -1233,7 +1114,6 @@ contract Zeronauts is Context, IERC20, Ownable {
         if(!takeFee)
             restoreAllFee();
     }
-
     function _transferStandard(address sender, address recipient, uint256 tAmount) private {
         (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity) = _getValues(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
@@ -1242,7 +1122,6 @@ contract Zeronauts is Context, IERC20, Ownable {
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
-
     function _transferToExcluded(address sender, address recipient, uint256 tAmount) private {
         (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity) = _getValues(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
@@ -1252,7 +1131,6 @@ contract Zeronauts is Context, IERC20, Ownable {
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
-
     function _transferFromExcluded(address sender, address recipient, uint256 tAmount) private {
         (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity) = _getValues(tAmount);
         _tOwned[sender] = _tOwned[sender].sub(tAmount);
@@ -1272,5 +1150,4 @@ contract Zeronauts is Context, IERC20, Ownable {
         _receiver.transfer(amount);
         emit SafeWithdrwaBnb(msg.sender, _receiver, amount);
     }
-
 }
